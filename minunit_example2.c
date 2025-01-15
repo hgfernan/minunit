@@ -13,22 +13,23 @@ void test_teardown(void) {
 }
 
 
-// TODO handle tolerance negative or zero
+/* TODO handle tolerance negative or zero */
 
-#define alt_assert_double_tol(expected, result, tolerance) {\
+/*
+#define mu_assert_double_tol(expected, result, tolerance) MU__SAFE_BLOCK(\
 	double minunit_tmp_e;\
 	double minunit_tmp_r;\
 	double minunit_tmp_tol;\
-	double alt_ratio;\
+	double minunit_tmp_ratio;\
 	minunit_assert++;\
 	minunit_tmp_e = (expected);\
 	minunit_tmp_r = (result);\
 	minunit_tmp_tol = (tolerance);\
-	alt_ratio = minunit_tmp_r;\
+	minunit_tmp_ratio = minunit_tmp_r;\
 	if (minunit_tmp_e != 0.0) {\
-		alt_ratio = minunit_tmp_r / minunit_tmp_e;\
+		minunit_tmp_ratio = minunit_tmp_r / minunit_tmp_e;\
 	}\
-	if (fabs(1.0 - alt_ratio) > minunit_tmp_tol) {\
+	if (fabs(1.0 - minunit_tmp_ratio) > minunit_tmp_tol) {\
 		int minunit_significant_figures = 7;\
 		(void)snprintf(minunit_last_message, MINUNIT_MESSAGE_LEN, \
 		"%s failed:\n\t%s:%d: result %.*g exceeds tolerance %.*g against standard %.*g", \
@@ -41,7 +42,8 @@ void test_teardown(void) {
 	} else {\
 		printf(".");\
 	}\
-}
+)
+*/
 
 MU_TEST(test_assert_double_eq) {
 	mu_assert_double_eq(0.1, dbar);
@@ -52,19 +54,15 @@ MU_TEST(test_assert_double_eq_fail) {
 }
 
 MU_TEST(test_assert_statsmodels) {
-	alt_assert_double_tol(statsmodels, sarima, tolerance);
+	mu_assert_double_tol(statsmodels, sarima, tolerance);
 }
 
 MU_TEST(test_assert_forecast) {
-	alt_assert_double_tol(forecast, sarima, tolerance);
+	mu_assert_double_tol(forecast, sarima, tolerance);
 }
 
 MU_TEST(test_assert_mostfamous) {
-	alt_assert_double_tol(forecast, statsmodels, tolerance);
-}
-
-MU_TEST(test_fail) {
-	mu_fail("Fail now!");
+	mu_assert_double_tol(forecast, statsmodels, tolerance);
 }
 
 
@@ -79,7 +77,7 @@ MU_TEST_SUITE(test_suite) {
 	MU_RUN_TEST(test_assert_mostfamous);
 }
 
-int main(int argc, char *argv[]) {
+int main() {
 	MU_RUN_SUITE(test_suite);
 	MU_REPORT();
 	return MU_EXIT_CODE;

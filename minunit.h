@@ -220,6 +220,36 @@ static void (*minunit_teardown)(void) = NULL;
 	}\
 )
 
+
+#define mu_assert_double_tol(expected, result, tolerance) MU__SAFE_BLOCK(\
+	double minunit_tmp_e;\
+	double minunit_tmp_r;\
+	double minunit_tmp_tol;\
+	double minunit_tmp_ratio;\
+	minunit_assert++;\
+	minunit_tmp_e = (expected);\
+	minunit_tmp_r = (result);\
+	minunit_tmp_tol = (tolerance);\
+	minunit_tmp_ratio = minunit_tmp_r;\
+	if (minunit_tmp_e != 0.0) {\
+		minunit_tmp_ratio = minunit_tmp_r / minunit_tmp_e;\
+	}\
+	if (fabs(1.0 - minunit_tmp_ratio) > minunit_tmp_tol) {\
+		int minunit_significant_figures = 7;\
+		(void)snprintf(minunit_last_message, MINUNIT_MESSAGE_LEN, \
+		"%s failed:\n\t%s:%d: result %.*g exceeds tolerance of %.*g%% against standard %.*g", \
+		__func__, __FILE__, __LINE__, \
+		minunit_significant_figures, minunit_tmp_r, \
+		minunit_significant_figures, (100.0 * minunit_tmp_tol),\
+		minunit_significant_figures, minunit_tmp_e);\
+		minunit_status = 1;\
+		return;\
+	} else {\
+		printf(".");\
+	}\
+)
+
+
 /*
  * The following two functions were written by David Robert Nadeau
  * from http://NadeauSoftware.com/ and distributed under the
