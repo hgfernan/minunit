@@ -220,7 +220,7 @@ static void (*minunit_teardown)(void) = NULL;
 	}\
 )
 
-
+/* Compare a result against an expected value, within a tolerance ratio */
 #define mu_assert_double_tol(expected, result, tolerance) MU__SAFE_BLOCK(\
 	double minunit_tmp_e;\
 	double minunit_tmp_r;\

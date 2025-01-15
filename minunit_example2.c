@@ -1,5 +1,13 @@
 #include "minunit.h"
 
+/*  Test setup and teardown function pointers */
+static void (*minunit_setup_ext)(void*) = NULL;
+static void (*minunit_teardown_ext)(void*) = NULL;
+
+/*  Test setup and teardown parameter pointers */
+static void *minunit_setup_parm) = NULL;
+static void *minunit_teardown_parm) = NULL;
+
 static double dbar = 0.1;
 static double sarima = -11530.2;
 static double statsmodels = -15458.077;
@@ -12,38 +20,39 @@ void test_setup(void) {
 void test_teardown(void) {
 }
 
+void test_setup_ext(void*) {
+}
 
-/* TODO handle tolerance negative or zero */
+void test_teardown_ext(void*) {
+}
 
-/*
-#define mu_assert_double_tol(expected, result, tolerance) MU__SAFE_BLOCK(\
-	double minunit_tmp_e;\
-	double minunit_tmp_r;\
-	double minunit_tmp_tol;\
-	double minunit_tmp_ratio;\
-	minunit_assert++;\
-	minunit_tmp_e = (expected);\
-	minunit_tmp_r = (result);\
-	minunit_tmp_tol = (tolerance);\
-	minunit_tmp_ratio = minunit_tmp_r;\
-	if (minunit_tmp_e != 0.0) {\
-		minunit_tmp_ratio = minunit_tmp_r / minunit_tmp_e;\
-	}\
-	if (fabs(1.0 - minunit_tmp_ratio) > minunit_tmp_tol) {\
-		int minunit_significant_figures = 7;\
-		(void)snprintf(minunit_last_message, MINUNIT_MESSAGE_LEN, \
-		"%s failed:\n\t%s:%d: result %.*g exceeds tolerance %.*g against standard %.*g", \
-		__func__, __FILE__, __LINE__, \
-		minunit_significant_figures, minunit_tmp_r, \
-		minunit_significant_figures, minunit_tmp_tol,\
-		minunit_significant_figures, minunit_tmp_e);\
-		minunit_status = 1;\
-		return;\
-	} else {\
-		printf(".");\
-	}\
+/*  Configure setup and teardown functions, extended */
+#define MU_SUITE_CONFIGURE_EXT(setup_fun, setup_parm, teardown_fun, teardown_parm) MU__SAFE_BLOCK(\
+	minunit_setup_ext = setup_fun;\
+	minunit_teardown_ext = teardown_fun;\
+	minunit_setup_parm = setup_fun_parm;\
+	minunit_teardown_parm = teardown_fun_parm;\
 )
-*/
+
+/*  Test runner */
+#define MU_RUN_TEST_ext(test, parm) MU__SAFE_BLOCK(\
+	if (minunit_real_timer==0 && minunit_proc_timer==0) {\
+		minunit_real_timer = mu_timer_real();\
+		minunit_proc_timer = mu_timer_cpu();\
+	}\
+	if (minunit_setup_ext) (*minunit_setup_ext)(minunit_setup_parm);\
+	minunit_status = 0;\
+	test(parm);\
+	minunit_run++;\
+	if (minunit_status) {\
+		minunit_fail++;\
+		printf("F");\
+		printf("\n%s\n", minunit_last_message);\
+	}\
+	(void)fflush(stdout);\
+	if (minunit_teardown_ext) (*minunit_teardown_ext)(minunit_teardown_parm);\
+)
+
 
 MU_TEST(test_assert_double_eq) {
 	mu_assert_double_eq(0.1, dbar);
